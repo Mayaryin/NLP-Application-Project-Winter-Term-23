@@ -2,35 +2,45 @@
 """Module Docstring: A brief description of what this script does."""
 
 # Imports
-import sys
-import argparse
-
-def parse_arguments():
-    """Parses command-line arguments."""
-    parser = argparse.ArgumentParser(description="Script description.")
-    parser.add_argument('-arg1', '--argument1', type=str, help='Description of argument1.')
-    return parser.parse_args()
+import nltk
+from nltk.corpus import brown
+import re
+from CustomizedTreebankTokenizer import CustomizedTreebankTokenizer
+from BayesTokenizer import BayesTokenizer
+from SentenceSplitter import SentenceSplitter
 
 
-def perform_task():
-    """Performs the main task of the script."""
-    print("Performing the main task.")
-
-
-def main(args):
+def main():
     print("Script started.")
+    text = "(I like cats & dogs... but (I) don't like birds!)" \
+           ".()345 !" \
+           "\"" \
+           "multi-word expression \n New York \n" \
+           "blabla@email.com\n" \
+           "https://www.google.com/\n" \
+           "#hashtag"
+   # print(text)
 
-    # Use the command line arguments
-    if args.argument1:
-        print(f"Argument 1 is {args.argument1}")
+
+    tokenizer =  CustomizedTreebankTokenizer()
+    bayesTokenizer = BayesTokenizer()
+    #bayesTokenizer.printDocuments()
+    trainingSet,_,_ = bayesTokenizer.splitCorpus()
+    #print(trainingSet[:20])
+   # print(tokenizer.tokenize(text))
+    text = "This is U.S. This is a test. This senctence should not be spltted after com. but it should after abv2. This was because abv2. was at the end of a sentence "
+    sentenceSplitter = SentenceSplitter()
+    print(sentenceSplitter.split(text))
+
+
+
+
+
 
     print("done")
 
 
 # Entry-point check
 if __name__ == '__main__':
-    # Parse the command-line arguments
-    arguments = parse_arguments()
-
-    # Run the main function
-    main(arguments)
+    #arguments = parse_arguments()
+    main()
