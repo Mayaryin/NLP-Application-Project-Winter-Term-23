@@ -7,6 +7,8 @@ class SentenceSplitter:
     #we need to detect any markers that are followed by quotation marks
     #we need an abbreviation dictionary to filter out periods that follow an abbreviation
 
+    #todo: r"[a-zA-Z.] matches every word that ends with a period. this should be changed so that it matches sequences of letters and periods (U.S.)
+
     def isAbbreviation(self, word, abbreviations ):
         return word in abbreviations or re.match(r"[a-zA-Z.]+", word) or re.match(r"[^aeiouAEIOU]*\.", word)
 
