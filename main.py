@@ -28,7 +28,7 @@ def main():
     trainingSet,_,_ = bayesTokenizer.splitCorpus()
     #print(trainingSet[:20])
    # print(tokenizer.tokenize(text))
-    text = "This is U.S. This is a test. This senctence should not be spltted after com. but it should after abv2. This was because abv2. was at the end of a sentence "
+    text = "This is U.S. but is this a test? After abv2. I think."
     sentenceSplitter = SentenceSplitter()
     print(sentenceSplitter.split(text))
 
