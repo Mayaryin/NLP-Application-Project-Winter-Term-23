@@ -29,6 +29,7 @@ def main():
     #print(trainingSet[:20])
    # print(tokenizer.tokenize(text))
     text = "This is U.S. but is this a test? After abv2. I think."
+    text = text.split()
     sentenceSplitter = SentenceSplitter()
     print(sentenceSplitter.split(text))
 

@@ -35,10 +35,10 @@ class SentenceSplitter:
             return True
 
 
+    #expects a pre-tokenized text
     def split(self, text):
         abbreviations = ["abv1.", "abv2."]
         splitText = []
-        text = text.split()
         startIndex = 0
         for i, word in enumerate(text[:]):
 
