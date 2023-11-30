@@ -1,41 +1,124 @@
 import nltk
 from nltk.corpus import brown
 from nltk.tokenize import TreebankWordTokenizer
+from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
+from conllu import parse
 import random
+import re
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+from CustomizedTreebankTokenizer import CustomizedTreebankTokenizer
 
 class BayesTokenizer:
-    documents = [(list(brown.words(fileid)), category)
-                 for category in brown.categories()
-                 for fileid in brown.fileids(category)]
-    categories = brown.categories()
-    fileIdAdventure = brown.fileids("adventure")
-    wordsAdventure = list(brown.words(fileIdAdventure))
 
-    def printDocuments(self):
-        print("brown words: ", self.wordsAdventure)
+    # feature codes:
+    # no char present = 0
+    # upper case char = 1
+    # lower case char = 2
+    # special character wihtout whitespace and period = 3
+    # whitespace = 4
+    # number = 5
+    # punctuation = 6
 
-    def splitCorpus(self):
-        file_ids = list(brown.fileids())
-        random.shuffle(file_ids)
+    ambiguous_characters = ['.', ',', '-', '—', "'", '/', ':', ';', '"', '(', ')', '!', '?', '[', ']', '@']
+    model = LogisticRegression()
+    def importData(self, path):
+        with open(path, 'r') as file:
+            corpus = file.read()
+        parsedData = parse(corpus)
+        sentences = []
+        for sentence in parsedData:
+            if 'text' in sentence.metadata:
+                sentences.append(sentence.metadata['text'])
+        return sentences
 
-        numberOfFiles = len(file_ids)
-        train_split = int(numberOfFiles * 0.7) #70% of the corpus is used for training, 15% each for testing and evaluation
-        test_split = int(numberOfFiles * 0.85)
+    def unsplit(self, sentenceList):
+        return " ".join(sentenceList)
 
-        train_files = file_ids[:train_split]
-        test_files = file_ids[train_split:test_split]
-        eval_files = file_ids[test_split:]
+    def tokenizeData(self, text):
+        #return TreebankWordTokenizer().tokenize(text)
+        return CustomizedTreebankTokenizer().tokenize(text, True)
 
-        trainingCorpus = [word for fileid in train_files for word in brown.words(fileid)]
-        testCorpus = [word for fileid in test_files for word in brown.words(fileid)]
-        evaluationCorpus = [word for fileid in eval_files for word in brown.words(fileid)]
 
-        return trainingCorpus, testCorpus, evaluationCorpus
+    def isAtEndOfToken(self, token, index):
+        if index == len(token) -1:
+            return True
+        return False
 
-    def tokenize(self, corpus):
-        tokenizer = TreebankWordTokenizer
-        return tokenizer.tokenize(corpus)
+    def extractFeatures(self, text):
+        features = []
+        for index, char in enumerate(text):
+            if char in self.ambiguous_characters:
+                features.append(self.compileFeatureVector(text, index))
+        print(len(features))
+        return features
+    def extractLabels(self, token_list):
+        labels = []
+        for index, token in enumerate(token_list):
+            for withinSentenceIndex, char in enumerate(token):
+                if char in self.ambiguous_characters:
+                    labels.append(self.isAtEndOfToken(token, withinSentenceIndex))
+        print(len(labels))
+        return labels
 
+    def compileFeatureVector(self, text, i):
+        featureVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        j = i - 5  # index running on the sentence
+        k = 0  # index running on the feature vector
+        while j <= i + 5:  # fill an array with size i-3 to i+3
+            if (j == i): j += 1  # jump over the character itself
+            if j < 0: featureVector[k] = 0
+            if j >= len(text) - 1: featureVector[k] = 0
+            if j >= 0 and j < (len(text) - 1):
+                featureVector[k] = self.determineCharType(text[j])
+            j += 1
+            k += 1
+        return featureVector
+
+    def determineCharType(self, char):
+        if re.match(r"[A-Z]", char): return 1
+        if re.match(r"[a-z]", char): return 2
+        if re.match(r"[^A-Za-z0-9\s\.]", char): return 3
+        if re.match(r"\s", char): return 4
+        if re.match(r"[0-9]", char): return 5
+        if re.match(r"[\.]", char): return 6
+
+    def train(self, path):
+        trainCorpus = self.importData(path) #list of sentences
+        trainCorpusString = self.unsplit(trainCorpus) #all sentences merged in one string
+        trainCorpusTokens = self.tokenizeData(trainCorpusString) #tokenized text
+        features = self.extractFeatures(trainCorpusString) #extract features on character level
+        labels = self.extractLabels(trainCorpusTokens) #extract whether a char is at the end of a token
+        self.model.fit(features, labels)
+
+    def test(self, path):
+        testCorpus = self.importData(path)
+        testCorpusString = self.unsplit(testCorpus)
+        testCorpusTokens = self.tokenizeData(testCorpusString)
+        testFeatures = self.extractFeatures(testCorpusString)
+        testLabels = self.extractLabels(testCorpusTokens)
+        predictedLabels = self.model.predict(testFeatures)
+        accuracy = accuracy_score(testLabels, predictedLabels)
+        print("Accuracy:", accuracy)
+        print(classification_report(testLabels, predictedLabels))
+
+    def tokenize(self, inputText):
+        tokens = []
+        start = 0
+        for i, char in enumerate(inputText):
+            if char in self.ambiguous_characters:
+                features = self.compileFeatureVector(inputText, i)
+                is_boundary = self.model.predict([features])[0]
+
+                if is_boundary:
+                    token = inputText[start:i + 1].strip()
+                    tokens.append(token)
+                    start = i + 1
+        if start < len(inputText):
+            tokens.append(inputText[start:].strip())
+
+        return tokens
 
 
 
