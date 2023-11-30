@@ -8,7 +8,7 @@ import random
 import re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from CustomizedTreebankTokenizer import CustomizedTreebankTokenizer
+from TokenizerRulebased import CustomizedTreebankTokenizer
 from sklearn.naive_bayes import GaussianNB
 
 class BayesTokenizer:
