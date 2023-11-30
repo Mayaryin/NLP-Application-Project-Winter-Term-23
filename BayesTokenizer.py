@@ -9,6 +9,7 @@ import re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from CustomizedTreebankTokenizer import CustomizedTreebankTokenizer
+from sklearn.naive_bayes import GaussianNB
 
 class BayesTokenizer:
 
@@ -22,7 +23,8 @@ class BayesTokenizer:
     # punctuation = 6
 
     ambiguous_characters = ['.', ',', '-', '—', "'", '/', ':', ';', '"', '(', ')', '!', '?', '[', ']', '@']
-    model = LogisticRegression()
+    #model = LogisticRegression()
+    model = GaussianNB()
     def importData(self, path):
         with open(path, 'r') as file:
             corpus = file.read()
@@ -38,7 +40,7 @@ class BayesTokenizer:
 
     def tokenizeData(self, text):
         #return TreebankWordTokenizer().tokenize(text)
-        return CustomizedTreebankTokenizer().tokenize(text, True)
+        return CustomizedTreebankTokenizer().tokenize(text, True, False, False) #tokenize without replacing urls and email with placeholders
 
 
     def isAtEndOfToken(self, token, index):
@@ -63,12 +65,12 @@ class BayesTokenizer:
         return labels
 
     def compileFeatureVector(self, text, i):
-        featureVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        j = i - 5  # index running on the sentence
+        featureVector = [0, 0, 0, 0]
+        j = i - 2  # index running on the sentence
         k = 0  # index running on the feature vector
-        while j <= i + 5:  # fill an array with size i-3 to i+3
+        while j <= i + 2:  # fill an array with size i-3 to i+3
             if (j == i): j += 1  # jump over the character itself
-            if j < 0: featureVector[k] = 0
+            if j < 0: featureVector[k] = 0 #if there is no char at the position, assign 0
             if j >= len(text) - 1: featureVector[k] = 0
             if j >= 0 and j < (len(text) - 1):
                 featureVector[k] = self.determineCharType(text[j])
@@ -107,18 +109,28 @@ class BayesTokenizer:
         tokens = []
         start = 0
         for i, char in enumerate(inputText):
-            if char in self.ambiguous_characters:
-                features = self.compileFeatureVector(inputText, i)
-                is_boundary = self.model.predict([features])[0]
+            if char.isspace() or char in self.ambiguous_characters:
+                if char in self.ambiguous_characters:
+                    features = self.compileFeatureVector(inputText, i)
+                    is_boundary = self.model.predict([features])[0]
+                    print(features, is_boundary)
+                else:
+                    is_boundary = True
 
                 if is_boundary:
                     token = inputText[start:i + 1].strip()
-                    tokens.append(token)
+                    if token:  # Check to avoid adding empty strings
+                        tokens.append(token)
                     start = i + 1
+
+        # Handle any remaining text after the last boundary
         if start < len(inputText):
-            tokens.append(inputText[start:].strip())
+            remaining_token = inputText[start:].strip()
+            if remaining_token:  # Check to avoid adding empty strings
+                tokens.append(remaining_token)
 
         return tokens
+
 
 
 

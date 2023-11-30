@@ -10,6 +10,7 @@ from RegressionSentenceSplitter import RegressionSentenceSplitter
 from Normalizer import Normalizer
 from LexiconComplier import LexiconCompiler
 from nltk.tokenize import TreebankWordTokenizer
+from DynamicStopwordEliminator import DynamicStopwordEliminator
 
 
 
@@ -40,12 +41,14 @@ def main():
     sentences = BayesTokenizer().importData("UD_English-GUM/en_gum-ud-train.conllu")
     text = BayesTokenizer().unsplit(sentences)
 
-    #print(BayesTokenizer().tokenizeTrainingData(text))
+    tokens = CustomizedTreebankTokenizer().tokenize(text, True, True, True)
+    print(DynamicStopwordEliminator(tokens).deriveStopwords(tokens))
 
-    BayesTokenizer().train("UD_English-GUM/en_gum-ud-train.conllu")
+    #BayesTokenizer().train("UD_English-GUM/en_gum-ud-train.conllu")
     #BayesTokenizer().test("UD_English-GUM/en_gum-ud-test.conllu")
-    text3 = "I don't like food (apples)!"
-    print(BayesTokenizer().tokenize(text3))
+    #text3 = "I don't like food (apples)! My mail's ding@ding.com 3.5$"
+    #print(BayesTokenizer().tokenize(text3))
+    #print(CustomizedTreebankTokenizer().tokenize(text3, True, False, False))
 
     print("done")
 
