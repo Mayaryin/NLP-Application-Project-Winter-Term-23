@@ -42,10 +42,10 @@ def main():
     #text = rSenSplitter.unsplit(rSenSplitter.importData("UD_English-GUM/en_gum-ud-dev.conllu"))
     #print(rSenSplitter.split(text))
     text = ["I", "'m", "U.S.A", "usa", "test", "."]
-    normalizer = Normalizer()
-    #print(normalizer.normalize(text, False, False))
+    normalizer = Normalizer("english_dictionary.csv")
+    print(normalizer.normalize(text, False, True))
     #print(normalizer.normalize(text, True, True))
-    #print("done")
+    print("done")
 
     LexiconCompiler().compile()
 

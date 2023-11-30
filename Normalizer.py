@@ -5,6 +5,7 @@ import nltk
 nltk.download('wordnet')
 from nltk.corpus import wordnet
 import string
+import csv
 class Normalizer():
 
     #the normalizer works on tokenized text
@@ -15,17 +16,25 @@ class Normalizer():
 
     #https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
 
-    clitics_dictionary = {
-        "'ll": "will",
-        "'d": "would/had",
-        "'s": "is/has",
-        "'re": "are",
-        "'ve": "have",
-        "'m": "am",
-        "n't": "not"
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.dictionary = self.read_csv()
+        self.clitics_dictionary = {
+            "'ll": "will",
+            "'d": "would/had",
+            "'s": "is/has",
+            "'re": "are",
+            "'ve": "have",
+            "'m": "am",
+            "n't": "not"
     }
 
-    dictionary = get_dict()
+    def read_csv(self):
+        with open(self.file_path, 'r') as file:
+            reader = csv.reader(file)
+            data_list = [row[0] for row in reader]
+        return data_list
+
 
     def isStandardWord(self, token):
         if not bool(wordnet.lemmas(token)):
@@ -33,10 +42,9 @@ class Normalizer():
         return True
 
     def returnClosestWord(self, token):
-        referenceWords = self.dictionary.keys()
         distance = 1000
         closestWord = "xxxxxx"
-        for word in referenceWords:
+        for word in self.dictionary:
             currentDistance = self.levenshtein(token, word)
             if currentDistance < distance:
                 distance = currentDistance
@@ -81,13 +89,12 @@ class Normalizer():
         #replace misspelled words by their most similar one from the dictionary
         normalized_tokens = []
         for token in token_list:
-            if not self.isStandardWord(token):
+            if not token in self.dictionary:
                 print(token + " is not a standard word")
                 substitution = self.returnClosestWord(token)
                 normalized_tokens.append(substitution)
                 print(substitution + " is the conversion")
             else: normalized_tokens.append(token)
 
-        print(self.dictionary.get("usa", "not found"))
 
         return normalized_tokens

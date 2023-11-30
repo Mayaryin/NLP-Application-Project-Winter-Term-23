@@ -13,9 +13,12 @@ class LexiconCompiler:
         for synset in wordnet.all_synsets():
             for lemma in synset.lemmas():
                 all_words.add(lemma.name())
-        all_words.add(self.dictionary.keys())
+        for key in self.dictionary.keys():
+            all_words.add(key)
 
         words_list = list(all_words)
+
+        words_list = [word.replace("_", " ") for word in words_list]
 
         with open('english_dictionary.csv', 'w', newline='') as file:
             writer = csv.writer(file)
