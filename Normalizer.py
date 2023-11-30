@@ -11,10 +11,8 @@ class Normalizer():
     #the normalizer works on tokenized text
     #applies lowercasing if enabled
     #removes all tokens that are punctuation marks
-    #removes clitics if enabled
+    #expands clitics
     #non-standard words will be identified by looking up each token in an english dictionary
-
-    #https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -35,23 +33,17 @@ class Normalizer():
             data_list = [row[0] for row in reader]
         return data_list
 
-
-    def isStandardWord(self, token):
-        if not bool(wordnet.lemmas(token)):
-            return self.dictionary.get(token, "not found") != "not found" #true if word is found
-        return True
-
     def returnClosestWord(self, token):
         distance = 1000
-        closestWord = "xxxxxx"
+        closestWord = ""
         for word in self.dictionary:
             currentDistance = self.levenshtein(token, word)
             if currentDistance < distance:
                 distance = currentDistance
                 closestWord = word
-                #print(closestWord)
         return closestWord
 
+    # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
     def levenshtein(self, word1, word2):
         if len(word1) < len(word2):
             return self.levenshtein(word2, word1)
@@ -73,7 +65,7 @@ class Normalizer():
 
         return previous_row[-1]
 
-    def normalize(self, token_list, lowercaseEnabled, expansionEnabled):
+    def normalize(self, token_list, lowercaseEnabled):
 
         #convert to lowercase if enabled
         if lowercaseEnabled:
@@ -83,18 +75,19 @@ class Normalizer():
         token_list = [token for token in token_list if token not in string.punctuation]
 
         #expand clitics if enabled
-        if expansionEnabled:
-            token_list = [self.clitics_dictionary.get(token, token) for token in token_list]
+        token_list = [self.clitics_dictionary.get(token, token) for token in token_list]
 
         #replace misspelled words by their most similar one from the dictionary
         normalized_tokens = []
+
         for token in token_list:
+            if token in self.clitics_dictionary:
+                normalized_tokens.append(self.clitics_dictionary.get(token, token))
             if not token in self.dictionary:
                 print(token + " is not a standard word")
                 substitution = self.returnClosestWord(token)
                 normalized_tokens.append(substitution)
                 print(substitution + " is the conversion")
             else: normalized_tokens.append(token)
-
 
         return normalized_tokens

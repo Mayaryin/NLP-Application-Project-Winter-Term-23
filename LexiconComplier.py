@@ -4,9 +4,12 @@ nltk.download('wordnet')
 from english_dictionary.scripts.read_pickle import get_dict
 import csv
 class LexiconCompiler:
+
+    #compiles all words from nltk wordnet and https://pypi.org/project/english-dictionary/ into one csv
+    #all words are lowercase
+    #all underscores are removed
+
     dictionary = get_dict()
-
-
 
     def compile(self):
         all_words = set()  # Using a set to avoid duplicates
@@ -25,5 +28,3 @@ class LexiconCompiler:
             writer = csv.writer(file)
             for word in lowercase_list:
                 writer.writerow([word])
-
-
