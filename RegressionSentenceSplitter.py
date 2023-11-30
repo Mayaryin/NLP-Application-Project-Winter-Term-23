@@ -3,7 +3,7 @@ import numpy as np
 import re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
+
 class RegressionSentenceSplitter:
 
     #feature codes:
