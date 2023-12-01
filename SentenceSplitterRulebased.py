@@ -1,4 +1,5 @@
 import re
+import csv
 class SentenceSplitter:
 
     #detect different types of end-of-sentence markers
@@ -8,6 +9,14 @@ class SentenceSplitter:
     #sentences like He said "I don't care." are syntactically wrong. they would be spliited
     #incorrectly by this splitter
 
+    def __init__(self):
+        self.abbreviationList = self.read_csv("abbr.csv")
+
+    def read_csv(self, path):
+        with open(path, 'r') as file:
+            reader = csv.reader(file)
+            data_list = [row[0] for row in reader]
+        return data_list
 
     def isAbbreviation(self, word, abbreviations ):
         return word in abbreviations \

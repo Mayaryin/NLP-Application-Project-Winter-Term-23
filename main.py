@@ -6,7 +6,7 @@
 from TokenizerRulebased import TokenizerRulebased
 from TokenizerML import TokenizerML
 from SentenceSplitterRulebased import SentenceSplitter
-from SentenceSplitterML import RegressionSentenceSplitter
+from SentenceSplitterML import SentenceSplitterML
 from Normalizer import Normalizer
 from LexiconComplier import LexiconCompiler
 from nltk.tokenize import TreebankWordTokenizer
@@ -17,50 +17,57 @@ from BinaryNaiveBayesClassifier import BinaryNaiveBayesClassifier
 
 
 def main():
-    print("Script started.")
-    text = "(I like cats & dogs... but (I) don't like birds!)" \
-           ".()345 !" \
-           "\"" \
-           "multi-word expression \n New York \n" \
-           "blabla@email.com\n" \
-           "https://www.google.com/\n" \
-           "#hashtag"
+    print("NLP Text Processing Pipeline")
 
-    #sentences = TokenizerML().importData("UD_English-GUM/en_gum-ud-train.conllu")
-    #text2 = TokenizerML().unsplit(sentences)
+    #LexiconCompiler().compile()
 
-    ##Bayes Tokenizer
+    ##Tokenizer
+    ##1: window features
+    #2: general features
+    print("\nTOKENIZER")
+    mlTokenizer = TokenizerML()
     texttest = " this that the U.S. but is haven't aren't test? After abv2. I think. U.S.A USA usa I'm aren't"
-    TokenizerML().train("UD_English-GUM/en_gum-ud-train.conllu")
-    TokenizerML().test("UD_English-GUM/en_gum-ud-test.conllu")
-    print("rulebased: ", TokenizerRulebased().tokenize(texttest, True, False, False))
-    print("ML       : ", TokenizerML().tokenize(texttest))
+    texttest2 = " I haven't lived in the U.S. but I'll do it. What about you?"
+    mlTokenizer.train("UD_English-GUM/en_gum-ud-train.conllu", 2)
+    mlTokenizer.test("UD_English-GUM/en_gum-ud-test.conllu", 2)
+    print("rulebased: ", TokenizerRulebased().tokenize(texttest2, True, False, False))
+    print("Bayes    : ", mlTokenizer.tokenize(texttest2, 2))
 
     ##Sentence Splitter
-    #print(SentenceSplitter().split(text))
+    print("\nSENTENCE SPLITTER")
+    textForSentSplitter = "I like cats. Do you like cats, too? I hate #hashtags!"
+    mlSentenceSplitter = SentenceSplitterML()
+    mlSentenceSplitter.train("UD_English-GUM/en_gum-ud-train.conllu")
+    mlSentenceSplitter.test("UD_English-GUM/en_gum-ud-test.conllu")
+    print("Rulebased : \n", SentenceSplitter().split(textForSentSplitter))
+    print("Regression: \n", mlSentenceSplitter.split(textForSentSplitter))
 
     #text = " this  that the U.S. but is  a test? After abv2. I think. U.S.A USA usa I'm are'nt"
     #text = "ich heiße bananenpunkt. Der nächste Tag ist eine Ab.kürzung; Ja so war das! und was ist hiermit... ? K;23. 34.5 U.S. neuer Satz begonnen."
     #text = rSenSplitter.unsplit(rSenSplitter.importData("UD_English-GUM/en_gum-ud-dev.conllu"))
     #text = ["I", "'m", "U.S.A", "usa", "test", "."]
 
+    ##Normalizer
+    print("\nNORMALIZER")
+    normalizerText = "The U.S.A are large, i made a speling mistak."
+    print("Misspelled text: ", normalizerText)
+    normalizer = Normalizer("english_lexicon.csv")
+    tokens = TokenizerRulebased().tokenize(normalizerText, True, True, True)
+    print("Normalized text: ", normalizer.normalize(tokens, True))
 
 
     ###Dyn. Stopwords
+    print("\nSTOPWORDS")
+    sentences = TokenizerML().importData("UD_English-GUM/en_gum-ud-train.conllu")
+    stopwordsText = TokenizerML().unsplit(sentences)
+    tokens = TokenizerRulebased().tokenize(stopwordsText, True, True, True)
+    print("Dynamically derived stopwords: \n", DynamicStopwordEliminator(tokens).deriveStopwords(tokens))
 
-    #tokens = CustomizedTreebankTokenizer().tokenize(text, True, True, True)
-    #print(DynamicStopwordEliminator(tokens).deriveStopwords(tokens))
 
-    ##Bayes Tokenizer
-    #BayesTokenizer().train("UD_English-GUM/en_gum-ud-train.conllu")
-    #BayesTokenizer().test("UD_English-GUM/en_gum-ud-test.conllu")
-    #text3 = "I don't like food (apples)! My mail's ding@ding.com 3.5$"
-    #print(BayesTokenizer().tokenize(text3))
-    #print(CustomizedTreebankTokenizer().tokenize(text3, True, False, False))
 
     print("done")
 
-    #LexiconCompiler().compile()
+    #
 
 
 

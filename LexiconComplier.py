@@ -19,12 +19,17 @@ class LexiconCompiler:
         for key in self.dictionary.keys():
             all_words.add(key)
 
+        with open('abbr.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            for row in csv_reader:
+                all_words.add(row[0])
+
         words_list = list(all_words)
 
         words_list = [word.replace("_", " ") for word in words_list]
         lowercase_list = [item.lower() for item in words_list]
 
-        with open('english_dictionary.csv', 'w', newline='') as file:
+        with open('english_lexicon.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             for word in lowercase_list:
                 writer.writerow([word])

@@ -33,10 +33,7 @@ class BinaryNaiveBayesClassifier:
 
         for vector in negative_class:
             for feature_type, value in enumerate(vector):
-                self.class_conditionals_negative[feature_type][value] = self.class_conditionals_positive[feature_type].get(value, 0) + 1
-
-        #print("positive counts: ", self.class_conditionals_positive)
-        #print("negative counts: ", self.class_conditionals_negative)
+                self.class_conditionals_negative[feature_type][value] = self.class_conditionals_negative[feature_type].get(value, 0) + 1
 
         #convert counts to probabilites by dividing them by the total number of samples in the class
         for dictionary in self.class_conditionals_positive:
@@ -59,15 +56,12 @@ class BinaryNaiveBayesClassifier:
             prior += np.log(conditionals[feature_type].get(value, 1e-10)) #avoid log of zero (Laplace)
 
         posterior = prior
-
         return posterior
 
     def fit(self, features, labels):
         self.countSamplesInClasses(labels)
         self.calculatePriorProbabilies(labels)
         self.computeClassConditionals(features, labels)
-        #print("positive probs: ", self.class_conditionals_positive)
-        #print("negative probs: ", self.class_conditionals_negative)
 
     def predict(self, features):
         predictionResults = []

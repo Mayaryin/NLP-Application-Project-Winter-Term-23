@@ -9,7 +9,10 @@ class TokenizerRulebased():
         (re.compile(r"([\(\)\[\]\{\}\<\>])"), r" \1 "),  # pad brackets with whitespaces
         (re.compile(r"([\"\´\`])"), r" \1 "),  # pad quotation marks with whitespaces
         (re.compile(r"\n"), r" "),  # replace newline by whitespace
-        (re.compile(r"([.,;:!?%\"\'\)\]])(?=\s|$|\n)"), r" \1 "),  # separate punctuation that is followed by a whitespace
+       # (re.compile(r"([.,;:!?%\"\'\)\]])(?=\s|$|\n)"), r" \1 "),  # separate punctuation that is followed by a whitespace
+        (re.compile(r"(?<!\b\w\.\b)(?<!\d)\b([.,;:!?%\"\'\)\]])(?=\s|$|\n)"), r" \1 "),
+        #(?<!\b\w\.\b) ensures that the punctuation is not immediately preceded by a single letter followed by a period (common in abbreviations like "U.S.A.").
+        #(?<!\d) ensures that the punctuation is not immediately preceded by a digit (common in numbers like "3.30").
         (re.compile(r"^([.,;:!?%\"\'])"), r" \1 "),  # separate punctuation at the beginning of a string
         (re.compile(r"\.\.\."), r" ... "),  # separate out 3 periods as a single token
 

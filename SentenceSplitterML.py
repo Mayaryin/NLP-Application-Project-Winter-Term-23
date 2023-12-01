@@ -4,7 +4,7 @@ import re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
-class RegressionSentenceSplitter:
+class SentenceSplitterML:
 
     #feature codes:
     #no char present = 0
