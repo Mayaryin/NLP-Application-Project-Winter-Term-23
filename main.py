@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Module Docstring: A brief description of what this script does."""
 
 # Imports
 
@@ -9,12 +8,11 @@ from SentenceSplitterRulebased import SentenceSplitter
 from SentenceSplitterML import SentenceSplitterML
 from Normalizer import Normalizer
 from LexiconComplier import LexiconCompiler
-from nltk.tokenize import TreebankWordTokenizer
 from StopwordEliminatorDynamic import DynamicStopwordEliminator
-from BinaryNaiveBayesClassifier import BinaryNaiveBayesClassifier
 
-
-
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 
 def main():
     print("NLP Text Processing Pipeline")
@@ -26,19 +24,18 @@ def main():
     #2: general features
     print("\nTOKENIZER")
     mlTokenizer = TokenizerML()
-    texttest = " this that the U.S. but is haven't aren't test? After abv2. I think. U.S.A USA usa I'm aren't"
+    texttest = "I split aren't in 2.3 tokens. After an abbr. you shouldn't split£."
     texttest2 = " I haven't lived in the U.S. but I'll do it. What about you?"
     print("Accuracy of Bayes Tokenizer with standard feature set:\n")
     mlTokenizer.train("UD_English-GUM/en_gum-ud-train.conllu", 2)
     mlTokenizer.test("UD_English-GUM/en_gum-ud-test.conllu", 2)
     windowTokenizer = TokenizerML()
-    print("Accuracy of Bayes Tokenizer with window feature set:\n")
+    print("Accuracy of Bayes Tokenizer with window feature set (n=4):\n")
     windowTokenizer.train("UD_English-GUM/en_gum-ud-train.conllu", 1)
     windowTokenizer.test("UD_English-GUM/en_gum-ud-test.conllu", 1)
-    print("Rulebased: \n", TokenizerRulebased().tokenize(texttest2, True, False, False))
+    print("Rulebased: \n", TokenizerRulebased().tokenize(texttest, True, False, False))
     print("Bayes with general features:\n ", mlTokenizer.tokenize(texttest2, 2))
     print("Bayes with window features:\n ", windowTokenizer.tokenize(texttest2, 1))
-
 
     ##Sentence Splitter
     print("\nSENTENCE SPLITTER")
@@ -50,37 +47,32 @@ def main():
     tokenizedTextForSentSplitter = textForSentSplitter.split()
     print("Rulebased : \n", SentenceSplitter().split(tokenizedTextForSentSplitter))
 
-
-    #text = " this  that the U.S. but is  a test? After abv2. I think. U.S.A USA usa I'm are'nt"
-    #text = "ich heiße bananenpunkt. Der nächste Tag ist eine Ab.kürzung; Ja so war das! und was ist hiermit... ? K;23. 34.5 U.S. neuer Satz begonnen."
-    #text = rSenSplitter.unsplit(rSenSplitter.importData("UD_English-GUM/en_gum-ud-dev.conllu"))
-    #text = ["I", "'m", "U.S.A", "usa", "test", "."]
-
     ##Normalizer
     print("\nNORMALIZER")
-    normalizerText = "The U.S.A are large, i made a speling mistak."
+    normalizerText = "The U.S.A are large, i mad a speling mistek."
     print("Misspelled text: ", normalizerText)
     normalizer = Normalizer("english_lexicon.csv")
     tokens = TokenizerRulebased().tokenize(normalizerText, True, True, True)
     print("Normalized text: ", normalizer.normalize(tokens, True))
 
-
-    ###Dyn. Stopwords
+    ###Stopwords
     print("\nSTOPWORDS")
     sentences = TokenizerML().importData("UD_English-GUM/en_gum-ud-train.conllu")
     stopwordsText = TokenizerML().unsplit(sentences)
     tokens = TokenizerRulebased().tokenize(stopwordsText, True, True, True)
-    print("Dynamically derived stopwords: \n", DynamicStopwordEliminator(tokens).deriveStopwords(tokens))
 
+    dynStopwords = set(DynamicStopwordEliminator(tokens).deriveStopwords(tokens))
+    nltkStopwords = set(stopwords.words('english'))
+    # Calculate the portion of nltkStopwords contained in dynamic stopwords
+    overlap = dynStopwords.intersection(nltkStopwords)
+    portion = len(overlap) / len(dynStopwords)
 
+    print("Dynamically derived stopwords: \n", dynStopwords)
+    print("Stopwords from NLTK: \n", nltkStopwords)
+    print("Overlap: ", portion)
 
     print("done")
 
-    #
-
-
-
-# Entry-point check
 if __name__ == '__main__':
     #arguments = parse_arguments()
     main()

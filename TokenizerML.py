@@ -33,6 +33,7 @@ class TokenizerML:
     #the word following the candidate
     #whether the word preceding the candidate is an abbreviation
     # whether the word following the candidate is an abbreviation
+    #whether next word is capital
 
     #features are computed for punctuation and chars that are followed by punctiation
 

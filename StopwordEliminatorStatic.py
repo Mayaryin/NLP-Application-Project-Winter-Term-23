@@ -7,5 +7,5 @@ class StaticStopwordEliminator:
 
     #expects a tokenized text, that is, a list of words
     #returns a list of words
-    def eliminateStopwords(self, text):
-        return [word for word in text if word.lower() not in self.stopWords]
+    def eliminateStopwords(self, token_list):
+        return [word for word in token_list if word.lower() not in self.stopWords]

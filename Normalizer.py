@@ -84,10 +84,10 @@ class Normalizer():
             if token in self.clitics_dictionary:
                 normalized_tokens.append(self.clitics_dictionary.get(token, token))
             if not token in self.dictionary:
-                print(token + " is not a standard word")
+                #print(token + " is not a standard word")
                 substitution = self.returnClosestWord(token)
                 normalized_tokens.append(substitution)
-                print(substitution + " is the conversion")
+                #print(substitution + " is the conversion")
             else: normalized_tokens.append(token)
 
         return normalized_tokens
