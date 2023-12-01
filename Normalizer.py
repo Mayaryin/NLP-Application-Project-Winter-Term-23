@@ -74,7 +74,7 @@ class Normalizer():
         #remove all punctuation tokens
         token_list = [token for token in token_list if token not in string.punctuation]
 
-        #expand clitics if enabled
+        #expand clitics
         token_list = [self.clitics_dictionary.get(token, token) for token in token_list]
 
         #replace misspelled words by their most similar one from the dictionary

@@ -49,7 +49,7 @@ def main():
 
     ##Normalizer
     print("\nNORMALIZER")
-    normalizerText = "The U.S.A are large, i mad a speling mistek."
+    normalizerText = "The U.S.A are large, i'm mad and made a speling mistak."
     print("Misspelled text: ", normalizerText)
     normalizer = Normalizer("english_lexicon.csv")
     tokens = TokenizerRulebased().tokenize(normalizerText, True, True, True)
