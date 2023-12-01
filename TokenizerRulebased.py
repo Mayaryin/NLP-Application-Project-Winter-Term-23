@@ -1,5 +1,5 @@
 import re
-class CustomizedTreebankTokenizer():
+class TokenizerRulebased():
 
     #can't is a special case and will be substituted with cannot (expansion)
     #n't: look wether ' is surrounded by n and t and then split before n
@@ -27,12 +27,12 @@ class CustomizedTreebankTokenizer():
         (re.compile(r"(\b\w+)(\'ll)\b"), r"\1 \2"),
         (re.compile(r"(\b\w+)(\'d)\b"), r"\1 \2"),
         (re.compile(r"(\b\w+)(\'s)\b"), r"\1 \2"),
-        (re.compile(r"(\b\w+)(\'re)\b"), r"\1 \2"),
         (re.compile(r"(\b\w+)(n\'t)\b"), r"\1 \2"),
+        (re.compile(r"(\b\w+)(\'re)\b"), r"\1 \2"),
     ]
 
     def tokenize(self, text: str, splitClitcsEnabled, specialCasesEnabled, specialEntitiesEnabled):
-
+        #todo: dont split periods at end of abbreviations and within numbers
         if splitClitcsEnabled:
             for pattern, substitution in self.CLITICS_RULES:
                 text = pattern.sub(substitution, text)
@@ -41,7 +41,7 @@ class CustomizedTreebankTokenizer():
             text = re.sub(r"\bwon\'t\b", "will not", text)
             text = re.sub(r"\bcan\'t\b", "cannot", text)
 
-        if specialCasesEnabled:
+        if specialEntitiesEnabled:
             for pattern, substitution in self.SPECIAL_ENTITIES_RULES:
                 text = pattern.sub(substitution, text)
 

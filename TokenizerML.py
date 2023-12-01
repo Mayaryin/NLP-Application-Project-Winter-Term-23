@@ -8,10 +8,11 @@ import random
 import re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from TokenizerRulebased import CustomizedTreebankTokenizer
+from TokenizerRulebased import TokenizerRulebased
 from sklearn.naive_bayes import GaussianNB
+from BinaryNaiveBayesClassifier import BinaryNaiveBayesClassifier
 
-class BayesTokenizer:
+class TokenizerML:
 
     # feature codes:
     # no char present = 0
@@ -24,7 +25,8 @@ class BayesTokenizer:
 
     ambiguous_characters = ['.', ',', '-', '—', "'", '/', ':', ';', '"', '(', ')', '!', '?', '[', ']', '@']
     #model = LogisticRegression()
-    model = GaussianNB()
+    #model = GaussianNB()
+    model = BinaryNaiveBayesClassifier()
     def importData(self, path):
         with open(path, 'r') as file:
             corpus = file.read()
@@ -39,10 +41,12 @@ class BayesTokenizer:
         return " ".join(sentenceList)
 
     def tokenizeData(self, text):
-        #return TreebankWordTokenizer().tokenize(text)
-        return CustomizedTreebankTokenizer().tokenize(text, True, False, False) #tokenize without replacing urls and email with placeholders
+        # tokenize without replacing urls and email with placeholders but with splitting of clitics
+        return TokenizerRulebased().tokenize(text, True, False, False)
 
 
+    #todo: how to handle splits at the beginnig of a token?
+    #maybe check for apostroph, then move to the preceeding char and compute features for that one
     def isAtEndOfToken(self, token, index):
         if index == len(token) -1:
             return True
@@ -53,7 +57,7 @@ class BayesTokenizer:
         for index, char in enumerate(text):
             if char in self.ambiguous_characters:
                 features.append(self.compileFeatureVector(text, index))
-        print(len(features))
+        #print(len(features))
         return features
     def extractLabels(self, token_list):
         labels = []
@@ -61,7 +65,7 @@ class BayesTokenizer:
             for withinSentenceIndex, char in enumerate(token):
                 if char in self.ambiguous_characters:
                     labels.append(self.isAtEndOfToken(token, withinSentenceIndex))
-        print(len(labels))
+        #print(len(labels))
         return labels
 
     def compileFeatureVector(self, text, i):
@@ -113,7 +117,7 @@ class BayesTokenizer:
                 if char in self.ambiguous_characters:
                     features = self.compileFeatureVector(inputText, i)
                     is_boundary = self.model.predict([features])[0]
-                    print(features, is_boundary)
+                    #print(features, is_boundary)
                 else:
                     is_boundary = True
 
