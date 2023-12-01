@@ -18,8 +18,8 @@ class SentenceSplitter:
             data_list = [row[0] for row in reader]
         return data_list
 
-    def isAbbreviation(self, word, abbreviations ):
-        return word in abbreviations \
+    def isAbbreviation(self, word):
+        return word in self.abbreviationList \
             or re.match(r"[a-zA-Z]+(\.[a-zA-Z.]+)+", word) \
             or re.match(r"[^aeiouAEIOU]*\.", word)
 
@@ -35,7 +35,7 @@ class SentenceSplitter:
         return re.match(r".*[\.?!]", word)
 
     def wordEndsWithEOSMarkerAndQuotationMark(self, word):
-        return re.match(r".*\.[\"\'\´\`]", word)
+        return re.match(r".*[\.\?!][\"\'\´\`]", word)
 
     def nextWordStartsWithQuotationMark(self, text, index):
         if self.thereIsANextWord(text, index):
@@ -44,27 +44,25 @@ class SentenceSplitter:
             return True
 
 
-    #expects a pre-tokenized text
-    def split(self, text):
-        abbreviations = ["abv1.", "abv2."]
+    def split(self, token_list):
         splitText = []
         startIndex = 0
-        for i, word in enumerate(text[:]):
-
+        for i, word in enumerate(token_list):
 
             if self.wordEndsWithEOSMarker(word) or self.wordEndsWithEOSMarkerAndQuotationMark(word):
-                if not self.isAbbreviation(word, abbreviations):
-                    splitText.append(text[startIndex:i+1])
+                if not self.isAbbreviation(word):
+                    splitText.append(token_list[startIndex:i+1])
                     startIndex = i+1
                 else:
-                    if self.isAbbreviation(word, abbreviations):
-                        if self.nextWordIsCapitalized(text, i) or self.nextWordStartsWithQuotationMark(text, i):
-                            splitText.append(text[startIndex:i + 1])
+                    if self.isAbbreviation(word):
+                        if self.nextWordIsCapitalized(token_list, i) or self.nextWordStartsWithQuotationMark(token_list, i):
+                            splitText.append(token_list[startIndex:i + 1])
                             startIndex = i + 1
-        if startIndex < len(text):
-            splitText.append(text[startIndex:])
+        if startIndex < len(token_list):
+            splitText.append(token_list[startIndex:])
+        concatenated_sentences = [' '.join(sentence) for sentence in splitText]
 
-        return splitText
+        return concatenated_sentences
 
 
 

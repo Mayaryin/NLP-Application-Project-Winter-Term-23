@@ -105,7 +105,8 @@ class SentenceSplitterML:
                     sentences.append(sentence)
                     start = i + 1
         if start < len(inputText):
-            sentences.append(inputText[start:].strip())
+            #sentences.append(inputText[start:].strip())
+            sentences.append(' '.join(inputText[start:]))
 
         return sentences
 
